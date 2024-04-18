@@ -1,12 +1,15 @@
 import java.util.Random;
 
 public class DungeonGenerator {
-    private static final int WIDTH = 50;         // Taille de la matrice
-    private static final int HEIGHT = 20;        // Taille de la matrice
-    private static final int RANDOMITY = 10;    // Nombre de salles placées aléatoirement sur la avant toute vérification (Ne semble pas etre très utile à part pour ralentir le code).
+    private static final int WIDTH = 35;         // Taille de la matrice
+    private static final int HEIGHT = 12;        // Taille de la matrice
+    private static final int RANDOMITY = 5;     // Nombre de salles placées aléatoirement sur la avant toute vérification (Ne semble pas etre très utile à part pour ralentir le code).
                                                  // Ne dois pas dépaser WIDTH * HEIGHT - 2
+    private static final boolean ARCHAIC = true; // Si true, les salles seront connectées
+                                                 // si false, les salles non connectées seront supprimées du graph
 
     private static final int MIN_DISTANCE = 10;   // Distance minimale entre A et B (En distance de Manhattan)
+                                                  // Peut être très long à placer si la distance est très grande voire impossible si un "Spot" apparait au milieu
 
     // Si on veut un donjon classique, simple et peu piegeux, il est conseillé de mettre MIN_DISTANCE et RANDOMITY assez bas.
     // Si on veut un donjon plus complexe, avec des salles plus nombreuses et plus éloignées, il est conseillé de mettre MIN_DISTANCE et RANDOMITY assez haut.
@@ -49,7 +52,11 @@ public class DungeonGenerator {
             for (int x = 0; x < WIDTH; x++) {
                 if (matrix[y][x] != null && !(matrix[y][x] instanceof Spot)) {
                     if (!matrix[y][x].hasBeenConnected) {
-                        matrix[y][x] = null;
+                        if (this.ARCHAIC) {
+                            connectRoomToRoom(matrix[y][x], matrix[y][x].getNearestConnectedRoom());
+                        } else {
+                            matrix[y][x] = null;
+                        }
                     }
                 }
             }
@@ -75,6 +82,35 @@ public class DungeonGenerator {
         matrix = newMatrix;
     }
 
+    public void connectRoomToRoom(Room toConnect, Room connectedRoom) {
+        // On ajoute des salles entre les salles pour qu'elles soient connectées
+
+        int x = toConnect.x;
+        int y = toConnect.y;
+        int x2 = connectedRoom.x;
+        int y2 = connectedRoom.y;
+
+        while (x != x2 || y != y2) {
+            if (x != x2) {
+                if (x < x2) {
+                    x++;
+                } else {
+                    x--;
+                }
+            } else {
+                if (y < y2) {
+                    y++;
+                } else {
+                    y--;
+                }
+            }
+            if (matrix[y][x] == null) {
+                new Room(matrix, x, y);
+            }
+        }
+
+    }
+
     public void generate() {
         // Place randomly A and B
         int x_a = random.nextInt(WIDTH);
@@ -83,19 +119,26 @@ public class DungeonGenerator {
         int y_b = y_a;
 
         // In a While loop, so we make sure that A and B are not the same
+
+        System.out.println("Placement des points A et B");
         while ( (x_b == x_a && y_b == y_a)
                 || Math.abs(x_b - x_a) < MIN_DISTANCE
                 || Math.abs(y_b - y_a) < MIN_DISTANCE
         ) {
+            x_a = random.nextInt(WIDTH);
+            y_a = random.nextInt(HEIGHT);
+
             x_b = random.nextInt(WIDTH);
             y_b = random.nextInt(HEIGHT);
         }
 
         // Place A and B in the matrix
+
         Spot A = new Spot(matrix, x_a, y_a, "A");
         Spot B = new Spot(matrix, x_b, y_b, "B");
 
         // Placing random rooms
+        System.out.println("Placement des "+ RANDOMITY +" salles aléatoires");
         for (int i = 0; i < RANDOMITY; i++) {
             int x_r = x_a;
             int y_r = y_a;

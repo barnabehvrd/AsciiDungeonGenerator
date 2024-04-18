@@ -89,6 +89,26 @@ public class Room {
         this.hasBeenConnected = true;
     }
 
+    public Room getNearestConnectedRoom () {
+        Room nearest = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        // On cherche, dans la matrice, la salle la plus proche de la salle actuelle
+        for (int y = 0; y < matrix.length; y++) {
+            for (int x = 0; x < matrix[0].length; x++) {
+                if (matrix[y][x] != null && ((Room) matrix[y][x]).hasBeenConnected) {;
+                    int distance = Math.abs(this.x - x) + Math.abs(this.y - y);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearest = matrix[y][x];
+                    }
+                }
+            }
+        }
+
+        return nearest;
+    }
+
     @Override
     public String toString() {
         return "o";
