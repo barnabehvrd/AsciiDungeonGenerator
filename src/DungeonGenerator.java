@@ -37,7 +37,7 @@ public class DungeonGenerator {
         if (RANDOMITY >= WIDTH * HEIGHT - 2) {
             throw new IllegalArgumentException("RANDOMITY doit être inférieur à WIDTH * HEIGHT - 2 >:(");
         }
-        if (MIN_DISTANCE >= Math.min(WIDTH, HEIGHT)) {
+        if (MIN_DISTANCE >= Math.max(WIDTH, HEIGHT)) {
             throw new IllegalArgumentException("MIN_DISTANCE doit être inférieur à la taille minimale de la matrice >:(");
         }
 
